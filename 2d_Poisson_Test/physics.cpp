@@ -46,63 +46,65 @@ void init() {
     int i, j;
 
     //温度の初期化
-    #pragma omp parallel for private(j)
-    for ( i = 2; i < l + 1; i++) {
-        for ( j = 2; j < m / 2 + 1; j++) {
-            tempera[i][j] = Tmin;
+    #pragma omp parallel
+    {
+        #pragma omp for private(j)
+        for (i = 2; i < l + 1; i++) {
+            for (j = 2; j < m / 2 + 1; j++) {
+                tempera[i][j] = Tmin;
+            }
         }
-    }
-    #pragma omp for
-    for ( i = 0; i < l + 3; i++) {
-        tempera[i][0] = Tmin;
-        tempera[i][1] = Tmin;
-        tempera[i][m + 1] = Tmin;
-        tempera[i][m + 2] = Tmin;
-    }
-    #pragma omp for
-    for ( j = 0; j < m + 3; j++) {
-        tempera[0][j] = Tmin;
-        tempera[1][j] = Tmin;
-        tempera[l + 1][j] = Tmin;
-        tempera[l + 2][j] = Tmin;
-    }
-    #pragma omp for
-    for ( j = 9 * m / 20; j < 11 * m / 20; j++) {
-        tempera[1][j] = Tmax;
-    }
+        #pragma omp for
+        for (i = 0; i < l + 3; i++) {
+            tempera[i][0] = Tmin;
+            tempera[i][1] = Tmin;
+            tempera[i][m + 1] = Tmin;
+            tempera[i][m + 2] = Tmin;
+        }
+        #pragma omp for
+        for (j = 0; j < m + 3; j++) {
+            tempera[0][j] = Tmin;
+            tempera[1][j] = Tmin;
+            tempera[l + 1][j] = Tmin;
+            tempera[l + 2][j] = Tmin;
+        }
+        #pragma omp for
+        for (j = 9 * m / 20; j < 11 * m / 20; j++) {
+            tempera[1][j] = Tmax;
+        }
 
-    //速度、圧力、浮力の初期化
-    #pragma omp parallel for private(j)
-    for ( i = 0; i < l + 3; i++) {
-        for ( j = 0; j < m + 3; j++) {
-            u[i][j] = 0.0;
-            v[i][j] = 0.0;
-            u3[i][j] = 0.0;
-            v3[i][j] = 0.0;
-            p[i][j] = pb;
-            px[i][j] = pb;
-            py[i][j] = pb;
-            rho[i][j] = 0.0;
-            ome[i][j] = 0.0;
-            cx1[i][j] = 0.0;
-            cx2[i][j] = 0.0;
-            cx3[i][j] = 0.0;
-            cx4[i][j] = 0.0;
-            cx5[i][j] = 0.0;
-            cx6[i][j] = 0.0;
-            cx7[i][j] = 0.0;
-            cx8[i][j] = 0.0;
-            cx9[i][j] = 0.0;
+        //速度、圧力、浮力の初期化
+        #pragma omp for private(j)
+        for (i = 0; i < l + 3; i++) {
+            for (j = 0; j < m + 3; j++) {
+                u[i][j] = 0.0;
+                v[i][j] = 0.0;
+                u3[i][j] = 0.0;
+                v3[i][j] = 0.0;
+                p[i][j] = pb;
+                px[i][j] = pb;
+                py[i][j] = pb;
+                rho[i][j] = 0.0;
+                ome[i][j] = 0.0;
+                cx1[i][j] = 0.0;
+                cx2[i][j] = 0.0;
+                cx3[i][j] = 0.0;
+                cx4[i][j] = 0.0;
+                cx5[i][j] = 0.0;
+                cx6[i][j] = 0.0;
+                cx7[i][j] = 0.0;
+                cx8[i][j] = 0.0;
+                cx9[i][j] = 0.0;
+            }
+        }
+
+        #pragma omp for
+        for (j = 9 * m / 20; j < 11 * m / 20; j++) {
+            u[1][j] = ub; //吹き出し口のuはub
+            v[1][j] = vb; //吹き出し口のvはvb
+            rho[1][j] = rhob; //吹き出し口のrhoはrhob
         }
     }
-    
-    #pragma omp for
-    for ( j = 9 * m / 20; j < 11 * m / 20; j++) {
-        u[1][j] = ub; //吹き出し口のuはub
-        v[1][j] = vb; //吹き出し口のvはvb
-        rho[1][j] = rhob; //吹き出し口のrhoはrhob
-    }
-    
     std::cout << "init" << std::endl;
 }
 
@@ -195,100 +197,102 @@ void kawamuraByBiCGSTAB(int mode) {
     int i, j;
 
     //係数の計算(移流方程式の計算の時のみ)
-    #pragma omp parallel for private(j)
-    for ( i = 0; i < l + 3; i++) {
-        for ( j = 0; j < m + 3; j++) {
-            cx1[i][j] = 1.0 / dt + std::abs(u[i][j]) * 3.0 / (2.0 * dx) + std::abs(v[i][j]) * 3.0 / (2.0 * dy)
-                + tempc * 2.0 * (1.0 / (dx * dx) + 1.0 / (dy * dy)); //u3[i][j]の係数
-            cx2[i][j] = -u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i-1][j]の係数
-            cx3[i][j] = u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i+1][j]の係数
-            cx4[i][j] = -v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j-1]の係数
-            cx5[i][j] = v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j+1]の係数
-            cx6[i][j] = u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i-2][j]の係数
-            cx7[i][j] = -u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i+2][j]の係数
-            cx8[i][j] = v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j-2]の係数
-            cx9[i][j] = -v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j+2]の係数
+    #pragma omp parallel
+    {
+        #pragma omp for private(j)
+        for (i = 0; i < l + 3; i++) {
+            for (j = 0; j < m + 3; j++) {
+                cx1[i][j] = 1.0 / dt + std::abs(u[i][j]) * 3.0 / (2.0 * dx) + std::abs(v[i][j]) * 3.0 / (2.0 * dy)
+                    + tempc * 2.0 * (1.0 / (dx * dx) + 1.0 / (dy * dy)); //u3[i][j]の係数
+                cx2[i][j] = -u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i-1][j]の係数
+                cx3[i][j] = u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i+1][j]の係数
+                cx4[i][j] = -v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j-1]の係数
+                cx5[i][j] = v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j+1]の係数
+                cx6[i][j] = u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i-2][j]の係数
+                cx7[i][j] = -u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i+2][j]の係数
+                cx8[i][j] = v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j-2]の係数
+                cx9[i][j] = -v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j+2]の係数
+            }
         }
-    }
-   
 
-    //BiCG法の初期設定
-    #pragma omp parallel for private(j) reduction(+:rr)
-    for ( i = 2; i < l + 1; i++) {
-        for ( j = 2; j < m + 1; j++) {
-            double f = 0.0; //外力、もしくはソース項
-            if (mode == 1) {
-                //vの場合のみ浮力を加える(y方向の浮力)
-                //f = beta * (tempera[i][j] - Tmin); //浮力と渦
-                f = beta * (tempera[i][j] - Tmin) + vortCon(i, j, false); //浮力と渦
-            }
-            else if (mode == 3) {
-                //燃料密度は時間経過に従って指数関数的に減少
-                f = -crho * rho[i][j];
-            }
-            else if (mode == 2) {
-                //燃料の密度に比例して熱を発生
-                f = rhot * rho[i][j];
-            }
-            else if (mode == 0) {
-                f = vortCon(i, j, true);
-            }
 
-            double xcon = ans[i][j] / dt + f; //cx1で割る前の右辺
+        //BiCG法の初期設定
+        #pragma omp for private(j) reduction(+:rr)
+        for (i = 2; i < l + 1; i++) {
+            for (j = 2; j < m + 1; j++) {
+                double f = 0.0; //外力、もしくはソース項
+                if (mode == 1) {
+                    //vの場合のみ浮力を加える(y方向の浮力)
+                    //f = beta * (tempera[i][j] - Tmin); //浮力と渦
+                    f = beta * (tempera[i][j] - Tmin) + vortCon(i, j, false); //浮力と渦
+                }
+                else if (mode == 3) {
+                    //燃料密度は時間経過に従って指数関数的に減少
+                    f = -crho * rho[i][j];
+                }
+                else if (mode == 2) {
+                    //燃料の密度に比例して熱を発生
+                    f = rhot * rho[i][j];
+                }
+                else if (mode == 0) {
+                    f = vortCon(i, j, true);
+                }
 
-            resi[i][j] = xcon - (cx1[i][j] * ans3[i][j] + cx2[i][j] * ans3[i - 1][j] + cx3[i][j] * ans3[i + 1][j]
-                + cx4[i][j] * ans3[i][j - 1] + cx5[i][j] * ans3[i][j + 1]
-                + cx6[i][j] * ans3[i - 2][j] + cx7[i][j] * ans3[i + 2][j]
-                + cx8[i][j] * ans3[i][j - 2] + cx9[i][j] * ans3[i][j + 2]);
+                double xcon = ans[i][j] / dt + f; //cx1で割る前の右辺
 
-            resia[i][j] = resi[i][j];
-            pp[i][j] = resi[i][j];
-            rr += resia[i][j] * resi[i][j];
+                resi[i][j] = xcon - (cx1[i][j] * ans3[i][j] + cx2[i][j] * ans3[i - 1][j] + cx3[i][j] * ans3[i + 1][j]
+                    + cx4[i][j] * ans3[i][j - 1] + cx5[i][j] * ans3[i][j + 1]
+                    + cx6[i][j] * ans3[i - 2][j] + cx7[i][j] * ans3[i + 2][j]
+                    + cx8[i][j] * ans3[i][j - 2] + cx9[i][j] * ans3[i][j + 2]);
+
+                resia[i][j] = resi[i][j];
+                pp[i][j] = resi[i][j];
+                rr += resia[i][j] * resi[i][j];
+            }
         }
-    }
 
-    #pragma omp for
-    for ( i = 0; i < l + 3; i++) {
-        pp[i][0] = 0;
-        pp[i][1] = 0;
-        pp[i][m + 1] = 0;
-        pp[i][m + 2] = 0;
-        resi[i][0] = 0;
-        resi[i][1] = 0;
-        resi[i][m + 1] = 0;
-        resi[i][m + 2] = 0;
-        resia[i][0] = 0;
-        resia[i][1] = 0;
-        resia[i][m + 1] = 0;
-        resia[i][m + 2] = 0;
-        s[i][0] = 0;
-        s[i][1] = 0;
-        s[i][m + 1] = 0;
-        s[i][m + 2] = 0;
-    }
+        #pragma omp for
+        for (i = 0; i < l + 3; i++) {
+            pp[i][0] = 0;
+            pp[i][1] = 0;
+            pp[i][m + 1] = 0;
+            pp[i][m + 2] = 0;
+            resi[i][0] = 0;
+            resi[i][1] = 0;
+            resi[i][m + 1] = 0;
+            resi[i][m + 2] = 0;
+            resia[i][0] = 0;
+            resia[i][1] = 0;
+            resia[i][m + 1] = 0;
+            resia[i][m + 2] = 0;
+            s[i][0] = 0;
+            s[i][1] = 0;
+            s[i][m + 1] = 0;
+            s[i][m + 2] = 0;
+        }
 
-    #pragma omp for
-    for ( j = 0; j < m + 3; j++) {
-        resi[0][j] = 0;
-        resi[1][j] = 0;
-        resi[l + 1][j] = 0;
-        resi[l + 2][j] = 0;
-        resia[0][j] = 0;
-        resia[1][j] = 0;
-        resia[l + 1][j] = 0;
-        resia[l + 2][j] = 0;
-        pp[0][j] = 0;
-        pp[1][j] = 0;
-        pp[l + 1][j] = 0;
-        pp[l + 2][j] = 0;
-        s[0][j] = 0;
-        s[1][j] = 0;
-        s[l + 1][j] = 0;
-        s[l + 2][j] = 0;
+        #pragma omp for
+        for (j = 0; j < m + 3; j++) {
+            resi[0][j] = 0;
+            resi[1][j] = 0;
+            resi[l + 1][j] = 0;
+            resi[l + 2][j] = 0;
+            resia[0][j] = 0;
+            resia[1][j] = 0;
+            resia[l + 1][j] = 0;
+            resia[l + 2][j] = 0;
+            pp[0][j] = 0;
+            pp[1][j] = 0;
+            pp[l + 1][j] = 0;
+            pp[l + 2][j] = 0;
+            s[0][j] = 0;
+            s[1][j] = 0;
+            s[l + 1][j] = 0;
+            s[l + 2][j] = 0;
+        }
     }
 
     while (continueFlag) {
-
         //y=Appを計算
         #pragma omp parallel for private(j) reduction(+:r0y)
         for ( i = 2; i < l + 1; i++) {
@@ -309,45 +313,51 @@ void kawamuraByBiCGSTAB(int mode) {
         //修正係数αを計算
         alpha = rr / r0y;
 
-        //sを計算
-        #pragma omp parallel for private(j)
-        for ( i = 2; i < l + 1; i++) {
-            for ( j = 2; j < m + 1; j++) {
-                s[i][j] = resi[i][j] - alpha * y[i][j];
+        #pragma omp parallel
+        {
+            //sを計算
+            #pragma omp for private(j)
+            for (i = 2; i < l + 1; i++) {
+                for (j = 2; j < m + 1; j++) {
+                    s[i][j] = resi[i][j] - alpha * y[i][j];
+                }
             }
-        }
 
-        //z=Asを計算
-        #pragma omp parallel for private(j) reduction(+:zs) reduction(+:zz)
-        for ( i = 2; i < l + 1; i++) {
-            for ( j = 2; j < m + 1; j++) {
-                z[i][j] = cx1[i][j] * s[i][j] + cx2[i][j] * s[i - 1][j] + cx3[i][j] * s[i + 1][j]
-                    + cx4[i][j] * s[i][j - 1] + cx5[i][j] * s[i][j + 1]
-                    + cx6[i][j] * s[i - 2][j] + cx7[i][j] * s[i + 2][j]
-                    + cx8[i][j] * s[i][j - 2] + cx9[i][j] * s[i][j + 2];
-                zs += z[i][j] * s[i][j];
-                zz += z[i][j] * z[i][j];
+            //z=Asを計算
+            #pragma omp for private(j) reduction(+:zs) reduction(+:zz)
+            for (i = 2; i < l + 1; i++) {
+                for (j = 2; j < m + 1; j++) {
+                    z[i][j] = cx1[i][j] * s[i][j] + cx2[i][j] * s[i - 1][j] + cx3[i][j] * s[i + 1][j]
+                        + cx4[i][j] * s[i][j - 1] + cx5[i][j] * s[i][j + 1]
+                        + cx6[i][j] * s[i - 2][j] + cx7[i][j] * s[i + 2][j]
+                        + cx8[i][j] * s[i][j - 2] + cx9[i][j] * s[i][j + 2];
+                    zs += z[i][j] * s[i][j];
+                    zz += z[i][j] * z[i][j];
+                }
             }
         }
 
         //修正係数ωを計算
         omg = zs / zz;
 
-        //次のステップの近似値を計算
-        #pragma omp parallel for private(j)
-        for ( i = 2; i < l + 1; i++) {
-            for ( j = 2; j < m + 1; j++) {
-                ans3[i][j] += alpha * pp[i][j] + omg * s[i][j];
+        #pragma omp parallel
+        {
+            //次のステップの近似値を計算
+            #pragma omp for private(j)
+            for (i = 2; i < l + 1; i++) {
+                for (j = 2; j < m + 1; j++) {
+                    ans3[i][j] += alpha * pp[i][j] + omg * s[i][j];
+                }
             }
-        }
 
-        //次のステップの近似に対する残差を計算
-        #pragma omp parallel for private(j) reduction(+:r2) reduction(+:nrr)
-        for ( i = 2; i < l + 1; i++) {
-            for ( j = 2; j < m + 1; j++) {
-                resi[i][j] = s[i][j] - omg * z[i][j];
-                r2 += resi[i][j] * resi[i][j];
-                nrr += resia[i][j] * resi[i][j];
+            //次のステップの近似に対する残差を計算
+            #pragma omp for private(j) reduction(+:r2) reduction(+:nrr)
+            for (i = 2; i < l + 1; i++) {
+                for (j = 2; j < m + 1; j++) {
+                    resi[i][j] = s[i][j] - omg * z[i][j];
+                    r2 += resi[i][j] * resi[i][j];
+                    nrr += resia[i][j] * resi[i][j];
+                }
             }
         }
 
@@ -378,23 +388,26 @@ void kawamuraByBiCGSTAB(int mode) {
     }
 
     //境界条件を設定
-    #pragma omp for
-    for ( i = 0; i < l + 3; i++) {
-        ans3[i][0] = ans3[i][2]; //仮想セル
-        ans3[i][1] = tempp; //下の面の温度Tmin
-        ans3[i][m + 1] = tempp; //上の面の温度Tmin
-        ans3[i][m + 2] = ans3[i][m]; //仮想セル
-    }
-    #pragma omp for
-    for ( j = 0; j < m + 3; j++) {
-        ans3[0][j] = ans3[2][j]; //仮想セル
-        ans3[1][j] = tempp; //横の面の温度Tmin
-        ans3[l + 1][j] = tempp; //横の面の温度Tmin
-        ans3[l + 2][j] = ans3[l][j]; //仮想セル
-    }
-    #pragma omp for
-    for ( j = 9 * m / 20; j < 11 * m / 20; j++) {
-        ans3[1][j] = tempb; //吹き出し口の温度Tmax
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (i = 0; i < l + 3; i++) {
+            ans3[i][0] = ans3[i][2]; //仮想セル
+            ans3[i][1] = tempp; //下の面の温度Tmin
+            ans3[i][m + 1] = tempp; //上の面の温度Tmin
+            ans3[i][m + 2] = ans3[i][m]; //仮想セル
+        }
+        #pragma omp for
+        for (j = 0; j < m + 3; j++) {
+            ans3[0][j] = ans3[2][j]; //仮想セル
+            ans3[1][j] = tempp; //横の面の温度Tmin
+            ans3[l + 1][j] = tempp; //横の面の温度Tmin
+            ans3[l + 2][j] = ans3[l][j]; //仮想セル
+        }
+        #pragma omp for
+        for (j = 9 * m / 20; j < 11 * m / 20; j++) {
+            ans3[1][j] = tempb; //吹き出し口の温度Tmax
+        }
     }
 }
 
@@ -419,36 +432,39 @@ void pressureByCG() {
     int i, j;
 
     //CG法の初期設定
-    #pragma omp parallel for private(j) reduction(+:rr)
-    for ( i = 2; i < l + 1; i++) {
-        for ( j = 2; j < m + 1; j++) {
-            h = ((u3[i + 1][j] - u3[i - 1][j]) / dx + (v3[i][j + 1] - v3[i][j - 1]) / dy) / (2 * dt); //圧力のポアソン方程式の右辺
-            resi[i][j] = h -(cp3 * p[i + 1][j] + cp2 * p[i - 1][j] + cp5 * p[i][j + 1] + cp4 * p[i][j - 1] + cp1 * p[i][j]);
-            pp[i][j] = resi[i][j];
-            rr += resi[i][j] * resi[i][j];
+    #pragma omp parallel
+    {
+        #pragma omp for private(j) reduction(+:rr)
+        for (i = 2; i < l + 1; i++) {
+            for (j = 2; j < m + 1; j++) {
+                h = ((u3[i + 1][j] - u3[i - 1][j]) / dx + (v3[i][j + 1] - v3[i][j - 1]) / dy) / (2 * dt); //圧力のポアソン方程式の右辺
+                resi[i][j] = h - (cp3 * p[i + 1][j] + cp2 * p[i - 1][j] + cp5 * p[i][j + 1] + cp4 * p[i][j - 1] + cp1 * p[i][j]);
+                pp[i][j] = resi[i][j];
+                rr += resi[i][j] * resi[i][j];
+            }
         }
-    }
-    #pragma omp for
-    for ( i = 0; i < l + 3; i++) {
-        pp[i][0] = 0;
-        pp[i][1] = 0;
-        pp[i][m + 1] = 0;
-        pp[i][m + 2] = 0;
-        resi[i][0] = 0;
-        resi[i][1] = 0;
-        resi[i][m + 1] = 0;
-        resi[i][m + 2] = 0;
-    }
-    #pragma omp for
-    for ( j = 0; j < m + 3; j++) {
-        resi[0][j] = 0;
-        resi[1][j] = 0;
-        resi[l + 1][j] = 0;
-        resi[l + 2][j] = 0;
-        pp[0][j] = 0;
-        pp[1][j] = 0;
-        pp[l + 1][j] = 0;
-        pp[l + 2][j] = 0;
+        #pragma omp for
+        for (i = 0; i < l + 3; i++) {
+            pp[i][0] = 0;
+            pp[i][1] = 0;
+            pp[i][m + 1] = 0;
+            pp[i][m + 2] = 0;
+            resi[i][0] = 0;
+            resi[i][1] = 0;
+            resi[i][m + 1] = 0;
+            resi[i][m + 2] = 0;
+        }
+        #pragma omp for
+        for (j = 0; j < m + 3; j++) {
+            resi[0][j] = 0;
+            resi[1][j] = 0;
+            resi[l + 1][j] = 0;
+            resi[l + 2][j] = 0;
+            pp[0][j] = 0;
+            pp[1][j] = 0;
+            pp[l + 1][j] = 0;
+            pp[l + 2][j] = 0;
+        }
     }
 
     while (continueFlag) {
@@ -465,20 +481,23 @@ void pressureByCG() {
         //修正係数αを計算
         alpha = rr / ppy;
 
-        //次のステップの近似値を計算
-        #pragma omp parallel for private(j)
-        for ( i = 2; i < l + 1; i++) {
-            for ( j = 2; j < m + 1; j++) {
-                p[i][j] += alpha * pp[i][j];
+        #pragma omp parallel
+        {
+            //次のステップの近似値を計算
+            #pragma omp for private(j)
+            for (i = 2; i < l + 1; i++) {
+                for (j = 2; j < m + 1; j++) {
+                    p[i][j] += alpha * pp[i][j];
+                }
             }
-        }
 
-        //次のステップの近似に対する残差を計算
-        #pragma omp parallel for private(j) reduction(+:nrr)
-        for ( i = 2; i < l + 1; i++) {
-            for ( j = 2; j < m + 1; j++) {
-                resi[i][j] -= alpha * y[i][j];
-                nrr += resi[i][j] * resi[i][j];
+            //次のステップの近似に対する残差を計算
+            #pragma omp for private(j) reduction(+:nrr)
+            for (i = 2; i < l + 1; i++) {
+                for (j = 2; j < m + 1; j++) {
+                    resi[i][j] -= alpha * y[i][j];
+                    nrr += resi[i][j] * resi[i][j];
+                }
             }
         }
 
@@ -538,31 +557,34 @@ void velo(bool isU) {
     }
 
     int i, j;
-    #pragma omp parallel for private(j)
-    for (i = 1; i < l + 2; i++) {
-        for (j = 1; j < m + 2; j++) {
-            ans[i][j] = ans3[i][j] - dt * ansp[i][j];
+    #pragma omp parallel 
+    {
+        #pragma omp for private(j)
+        for (i = 1; i < l + 2; i++) {
+            for (j = 1; j < m + 2; j++) {
+                ans[i][j] = ans3[i][j] - dt * ansp[i][j];
+            }
         }
-    }
 
 
-    //速度の境界条件
-    #pragma omp for
-    for (int i = 0; i < l + 3; i++) {
-        ans[i][0] = ans[i][2]; //仮想セル
-        ans[i][1] = 0.0; //境界面の速度0
-        ans[i][m + 1] = 0.0; //境界面の速度0
-        ans[i][m + 2] = ans[i][m]; //仮想セル
-    }
-    #pragma omp for
-    for (int j = 0; j < m + 3; j++) {
-        ans[0][j] = ans[2][j]; //仮想セル
-        ans[1][j] = 0.0; //境界面の速度0
-        ans[l + 1][j] = 0.0; //境界面の速度0
-        ans[l + 2][j] = ans[l][j]; //仮想セル
-    }
-    #pragma omp for
-    for (int j = 9 * m / 20; j < 11 * m / 20; j++) {
-        ans[1][j] = tempb; //吹き出し口のuはub、vはvb
+        //速度の境界条件
+        #pragma omp for
+        for (int i = 0; i < l + 3; i++) {
+            ans[i][0] = ans[i][2]; //仮想セル
+            ans[i][1] = 0.0; //境界面の速度0
+            ans[i][m + 1] = 0.0; //境界面の速度0
+            ans[i][m + 2] = ans[i][m]; //仮想セル
+        }
+        #pragma omp for
+        for (int j = 0; j < m + 3; j++) {
+            ans[0][j] = ans[2][j]; //仮想セル
+            ans[1][j] = 0.0; //境界面の速度0
+            ans[l + 1][j] = 0.0; //境界面の速度0
+            ans[l + 2][j] = ans[l][j]; //仮想セル
+        }
+        #pragma omp for
+        for (int j = 9 * m / 20; j < 11 * m / 20; j++) {
+            ans[1][j] = tempb; //吹き出し口のuはub、vはvb
+        }
     }
 }
