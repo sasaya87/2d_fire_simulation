@@ -1,0 +1,2 @@
+﻿  2d_Poisson_Test.cpp
+opencv_world420.lib(opencv_world420.dll) : fatal error LNK1112: モジュールのコンピューターの種類 'x64' は対象コンピューターの種類 'x86' と競合しています。
