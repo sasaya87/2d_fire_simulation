@@ -48,7 +48,7 @@ void init() {
     //温度の初期化
     #pragma omp parallel
     {
-        #pragma omp for private(j)
+        #pragma omp for private(j) collapse(2)
         for (i = 2; i < l + 1; i++) {
             for (j = 2; j < m / 2 + 1; j++) {
                 tempera[i][j] = Tmin;
@@ -74,7 +74,7 @@ void init() {
         }
 
         //速度、圧力、浮力の初期化
-        #pragma omp for private(j)
+        #pragma omp for private(j) collapse(2)
         for (i = 0; i < l + 3; i++) {
             for (j = 0; j < m + 3; j++) {
                 u[i][j] = 0.0;
@@ -114,7 +114,7 @@ void init() {
 //渦度(のz成分)を計算(2次元なのでz成分のみ)
 void omega() {
     int i, j;
-    #pragma omp parallel for private(j)
+    #pragma omp parallel for private(j) collapse(2)
     for ( i = 1; i < l + 2; i++) {
         for ( j = 1; j < m + 2; j++) {
             ome[i][j] = ((v[i + 1][j] - v[i - 1][j]) / dx - (u[i][j + 1] - u[i][j - 1]) / dy) / 2.0;
@@ -199,7 +199,7 @@ void kawamuraByBiCGSTAB(int mode) {
     //係数の計算(移流方程式の計算の時のみ)
     #pragma omp parallel
     {
-        #pragma omp for private(j)
+        #pragma omp for private(j) collapse(2)
         for (i = 0; i < l + 3; i++) {
             for (j = 0; j < m + 3; j++) {
                 cx1[i][j] = 1.0 / dt + std::abs(u[i][j]) * 3.0 / (2.0 * dx) + std::abs(v[i][j]) * 3.0 / (2.0 * dy)
@@ -217,14 +217,14 @@ void kawamuraByBiCGSTAB(int mode) {
 
 
         //BiCG法の初期設定
-        #pragma omp for private(j) reduction(+:rr)
+        #pragma omp for private(j) reduction(+:rr) collapse(2)
         for (i = 2; i < l + 1; i++) {
             for (j = 2; j < m + 1; j++) {
                 double f = 0.0; //外力、もしくはソース項
                 if (mode == 1) {
                     //vの場合のみ浮力を加える(y方向の浮力)
                     //f = beta * (tempera[i][j] - Tmin); //浮力と渦
-                    f = beta * (tempera[i][j] - Tmin) + vortCon(i, j, false); //浮力と渦
+                    f = betab * (tempera[i][j] - Tmin) + vortCon(i, j, false); //浮力と渦
                 }
                 else if (mode == 3) {
                     //燃料密度は時間経過に従って指数関数的に減少
@@ -294,7 +294,7 @@ void kawamuraByBiCGSTAB(int mode) {
 
     while (continueFlag) {
         //y=Appを計算
-        #pragma omp parallel for private(j) reduction(+:r0y)
+        #pragma omp parallel for private(j) reduction(+:r0y) collapse(2)
         for ( i = 2; i < l + 1; i++) {
             for ( j = 2; j < m + 1; j++) {
                 if (mode == 4) {
@@ -316,7 +316,7 @@ void kawamuraByBiCGSTAB(int mode) {
         #pragma omp parallel
         {
             //sを計算
-            #pragma omp for private(j)
+            #pragma omp for private(j) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
                     s[i][j] = resi[i][j] - alpha * y[i][j];
@@ -324,7 +324,7 @@ void kawamuraByBiCGSTAB(int mode) {
             }
 
             //z=Asを計算
-            #pragma omp for private(j) reduction(+:zs) reduction(+:zz)
+            #pragma omp for private(j) reduction(+:zs) reduction(+:zz) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
                     z[i][j] = cx1[i][j] * s[i][j] + cx2[i][j] * s[i - 1][j] + cx3[i][j] * s[i + 1][j]
@@ -343,7 +343,7 @@ void kawamuraByBiCGSTAB(int mode) {
         #pragma omp parallel
         {
             //次のステップの近似値を計算
-            #pragma omp for private(j)
+            #pragma omp for private(j) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
                     ans3[i][j] += alpha * pp[i][j] + omg * s[i][j];
@@ -351,7 +351,7 @@ void kawamuraByBiCGSTAB(int mode) {
             }
 
             //次のステップの近似に対する残差を計算
-            #pragma omp for private(j) reduction(+:r2) reduction(+:nrr)
+            #pragma omp for private(j) reduction(+:r2) reduction(+:nrr) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
                     resi[i][j] = s[i][j] - omg * z[i][j];
@@ -370,7 +370,7 @@ void kawamuraByBiCGSTAB(int mode) {
         beta = (alpha /omg) * (nrr / rr);
 
         //次のステップの方向ベクトルppを計算
-        #pragma omp parallel for private(j)
+        #pragma omp parallel for private(j) collapse(2)
         for ( i = 2; i < l + 1; i++) {
             for ( j = 2; j < m + 1; j++) {
                 pp[i][j] = resi[i][j] + beta * (pp[i][j]-omg * y[i][j]);
@@ -434,7 +434,7 @@ void pressureByCG() {
     //CG法の初期設定
     #pragma omp parallel
     {
-        #pragma omp for private(j) reduction(+:rr)
+        #pragma omp for private(j) reduction(+:rr) collapse(2)
         for (i = 2; i < l + 1; i++) {
             for (j = 2; j < m + 1; j++) {
                 h = ((u3[i + 1][j] - u3[i - 1][j]) / dx + (v3[i][j + 1] - v3[i][j - 1]) / dy) / (2 * dt); //圧力のポアソン方程式の右辺
@@ -470,7 +470,7 @@ void pressureByCG() {
     while (continueFlag) {
 
         //yを計算
-        #pragma omp parallel for private(j) reduction(+:ppy)
+        #pragma omp parallel for private(j) reduction(+:ppy) collapse(2)
         for ( i = 2; i < l + 1; i++) {
             for ( j = 2; j < m + 1; j++) {
                 y[i][j] = cp1 * pp[i][j] + cp2 * pp[i - 1][j] + cp3 * pp[i + 1][j] + cp4 * pp[i][j - 1] + cp5 * pp[i][j + 1];
@@ -484,7 +484,7 @@ void pressureByCG() {
         #pragma omp parallel
         {
             //次のステップの近似値を計算
-            #pragma omp for private(j)
+            #pragma omp for private(j) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
                     p[i][j] += alpha * pp[i][j];
@@ -492,7 +492,7 @@ void pressureByCG() {
             }
 
             //次のステップの近似に対する残差を計算
-            #pragma omp for private(j) reduction(+:nrr)
+            #pragma omp for private(j) reduction(+:nrr) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
                     resi[i][j] -= alpha * y[i][j];
@@ -510,7 +510,7 @@ void pressureByCG() {
         beta = nrr / rr;
 
         //次のステップの方向ベクトルppを計算
-        #pragma omp parallel for private(j)
+        #pragma omp parallel for private(j) collapse(2)
         for ( i = 2; i < l + 1; i++) {
             for ( j = 2; j < m + 1; j++) {
                 pp[i][j] = resi[i][j] + beta * pp[i][j];
@@ -525,7 +525,7 @@ void pressureByCG() {
     }
 
     //圧力勾配の計算
-    #pragma omp parallel for private(j)
+    #pragma omp parallel for private(j) collapse(2)
     for ( i = 1; i < l + 2; i++) {
         for ( j = 1; j < m + 2; j++) {
             px[i][j] = (p[i + 1][j] - p[i - 1][j]) / (2.0 * dx);
@@ -559,7 +559,7 @@ void velo(bool isU) {
     int i, j;
     #pragma omp parallel 
     {
-        #pragma omp for private(j)
+        #pragma omp for private(j) collapse(2)
         for (i = 1; i < l + 2; i++) {
             for (j = 1; j < m + 2; j++) {
                 ans[i][j] = ans3[i][j] - dt * ansp[i][j];

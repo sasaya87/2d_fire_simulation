@@ -18,15 +18,15 @@ const double Tmin = 1.0; //Å’á‰·“x
 const double pb = 1.0; //‹«ŠE–Ê‚Ìˆ³—Í
 
 const double ub = 100.0; //u‚Ì‚«o‚µ‘¬“x
-const double vb = -20.0; //v‚Ì‚«o‚µ‘¬“x
+const double vb = -40.0; //v‚Ì‚«o‚µ‘¬“x
 
-const double come = 400.0; //‰Q“x‹­§–@‚ÌŒW”
+const double come = 300.0; //‰Q“x‹­§–@‚ÌŒW”
 
 const double rhob = 1.0; //‚«o‚µ‚Ì”R—¿–§“x
 const double crho = 20.0; //”R—¿‚ÌŠÔŒo‰ß‚É‚æ‚éŒ¸­‚ÌŒW”
 const double arho = 0.1; //”R—¿‚ÌŠgU‚É‚©‚©‚í‚éŒW”
 
-const double beta = 400.0; //•‚—Í‚ÌŒW”
+const double betab = 300.0; //•‚—Í‚ÌŒW”
 const double a = 10.0; //”M‚ÌŠgU‚É‚©‚©‚í‚éŒW”
 const double rhot = 400.0; //”R—¿–§“x‚Æ”­¶”M—Ê‚Ì”ä
 const double re = 2500.0; //ƒŒƒCƒmƒ‹ƒY”
