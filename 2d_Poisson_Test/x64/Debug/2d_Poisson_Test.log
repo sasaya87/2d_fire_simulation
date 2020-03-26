@@ -1,29 +1,21 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(459,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (2d_Poisson_Test.vcxproj, 2D_Thermal_Fluid.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  graphics.cpp
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\graphics.cpp(57,35): warning C4267: '初期化中': 'size_t' から 'GLint' に変換しました。データが失われているかもしれません。
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\graphics.cpp(169,60): warning C4244: '=': 'double' から 'GLfloat' への変換です。データが失われる可能性があります。
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\graphics.cpp(171,60): warning C4244: '=': 'double' から 'GLfloat' への変換です。データが失われる可能性があります。
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\graphics.cpp(172,64): warning C4244: '=': 'double' から 'GLfloat' への変換です。データが失われる可能性があります。
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\graphics.cpp(174,68): warning C4244: '=': 'double' から 'GLfloat' への変換です。データが失われる可能性があります。
-  mainProgram.cpp
   physics.cpp
 C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(51,48): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
 C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(77,48): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
 C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(117,53): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(202,48): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(220,64): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(297,74): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(319,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(327,84): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(346,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(354,85): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(373,57): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(437,64): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(473,74): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(487,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(495,69): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(513,57): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(528,53): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
-C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(562,48): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
-  コードを生成中...
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(204,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(223,64): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(299,74): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(316,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(324,84): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(343,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(351,85): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(370,57): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(434,64): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(470,74): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(484,52): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(492,69): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(510,57): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(525,53): warning C4849: 'collapse' ディレクティブで OpenMP 'parallel for' 句が無視されました
+C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\2d_Poisson_Test\physics.cpp(559,48): warning C4849: 'collapse' ディレクティブで OpenMP 'for' 句が無視されました
   2d_Poisson_Test.vcxproj -> C:\Users\delpr\source\repos\2D_Fire_Simulation_2019\x64\Debug\2D_Fire_simulation.exe

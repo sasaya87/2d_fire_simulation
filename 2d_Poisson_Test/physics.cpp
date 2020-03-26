@@ -199,19 +199,22 @@ void kawamuraByBiCGSTAB(int mode) {
     //ŒW”‚ÌŒvZ(ˆÚ—¬•û’ö®‚ÌŒvZ‚Ì‚Ì‚İ)
     #pragma omp parallel
     {
-        #pragma omp for private(j) collapse(2)
-        for (i = 0; i < l + 3; i++) {
-            for (j = 0; j < m + 3; j++) {
-                cx1[i][j] = 1.0 / dt + std::abs(u[i][j]) * 3.0 / (2.0 * dx) + std::abs(v[i][j]) * 3.0 / (2.0 * dy)
-                    + tempc * 2.0 * (1.0 / (dx * dx) + 1.0 / (dy * dy)); //u3[i][j]‚ÌŒW”
-                cx2[i][j] = -u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i-1][j]‚ÌŒW”
-                cx3[i][j] = u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i+1][j]‚ÌŒW”
-                cx4[i][j] = -v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j-1]‚ÌŒW”
-                cx5[i][j] = v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j+1]‚ÌŒW”
-                cx6[i][j] = u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i-2][j]‚ÌŒW”
-                cx7[i][j] = -u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i+2][j]‚ÌŒW”
-                cx8[i][j] = v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j-2]‚ÌŒW”
-                cx9[i][j] = -v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j+2]‚ÌŒW”
+        //cx‚Íu,v‚Å‹¤’Ê‚È‚Ì‚Åv‚Ì‚ÍŒvZ‚¹‚¸‚Éu‚ÌŒ‹‰Ê‚ğ—¬—p
+        if (mode != 1) {
+            #pragma omp for private(j) collapse(2)
+            for (i = 0; i < l + 3; i++) {
+                for (j = 0; j < m + 3; j++) {
+                    cx1[i][j] = 1.0 / dt + std::abs(u[i][j]) * 3.0 / (2.0 * dx) + std::abs(v[i][j]) * 3.0 / (2.0 * dy)
+                        + tempc * 2.0 * (1.0 / (dx * dx) + 1.0 / (dy * dy)); //u3[i][j]‚ÌŒW”
+                    cx2[i][j] = -u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i-1][j]‚ÌŒW”
+                    cx3[i][j] = u[i][j] * 2.0 / (3.0 * dx) - std::abs(u[i][j]) / dx - tempc / (dx * dx); //u3[i+1][j]‚ÌŒW”
+                    cx4[i][j] = -v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j-1]‚ÌŒW”
+                    cx5[i][j] = v[i][j] * 2.0 / (3.0 * dy) - std::abs(v[i][j]) / dy - tempc / (dy * dy); //u3[i][j+1]‚ÌŒW”
+                    cx6[i][j] = u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i-2][j]‚ÌŒW”
+                    cx7[i][j] = -u[i][j] / (12.0 * dx) + std::abs(u[i][j]) / (4.0 * dx); //u3[i+2][j]‚ÌŒW”
+                    cx8[i][j] = v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j-2]‚ÌŒW”
+                    cx9[i][j] = -v[i][j] / (12.0 * dy) + std::abs(v[i][j]) / (4.0 * dy); //u3[i][j+2]‚ÌŒW”
+                }
             }
         }
 
@@ -240,11 +243,10 @@ void kawamuraByBiCGSTAB(int mode) {
 
                 double xcon = ans[i][j] / dt + f; //cx1‚ÅŠ„‚é‘O‚Ì‰E•Ó
 
-                resi[i][j] = xcon - (cx1[i][j] * ans3[i][j] + cx2[i][j] * ans3[i - 1][j] + cx3[i][j] * ans3[i + 1][j]
+                resi[i][j] = xcon / cx1[i][j] - (ans3[i][j] + (cx2[i][j] * ans3[i - 1][j] + cx3[i][j] * ans3[i + 1][j]
                     + cx4[i][j] * ans3[i][j - 1] + cx5[i][j] * ans3[i][j + 1]
                     + cx6[i][j] * ans3[i - 2][j] + cx7[i][j] * ans3[i + 2][j]
-                    + cx8[i][j] * ans3[i][j - 2] + cx9[i][j] * ans3[i][j + 2]);
-
+                    + cx8[i][j] * ans3[i][j - 2] + cx9[i][j] * ans3[i][j + 2]) / cx1[i][j]);
                 resia[i][j] = resi[i][j];
                 pp[i][j] = resi[i][j];
                 rr += resia[i][j] * resi[i][j];
@@ -297,15 +299,10 @@ void kawamuraByBiCGSTAB(int mode) {
         #pragma omp parallel for private(j) reduction(+:r0y) collapse(2)
         for ( i = 2; i < l + 1; i++) {
             for ( j = 2; j < m + 1; j++) {
-                if (mode == 4) {
-                    y[i][j] = cp3 * pp[i + 1][j] + cp2 * pp[i - 1][j] + cp5 * pp[i][j + 1] + cp4 * pp[i][j - 1] + cp1 * pp[i][j];
-                }
-                else {
-                    y[i][j] = cx1[i][j] * pp[i][j] + cx2[i][j] * pp[i - 1][j] + cx3[i][j] * pp[i + 1][j]
-                        + cx4[i][j] * pp[i][j - 1] + cx5[i][j] * pp[i][j + 1]
-                        + cx6[i][j] * pp[i - 2][j] + cx7[i][j] * pp[i + 2][j]
-                        + cx8[i][j] * pp[i][j - 2] + cx9[i][j] * pp[i][j + 2];
-                }
+                y[i][j] = pp[i][j] + (cx2[i][j] * pp[i - 1][j] + cx3[i][j] * pp[i + 1][j]
+                    + cx4[i][j] * pp[i][j - 1] + cx5[i][j] * pp[i][j + 1]
+                    + cx6[i][j] * pp[i - 2][j] + cx7[i][j] * pp[i + 2][j]
+                    + cx8[i][j] * pp[i][j - 2] + cx9[i][j] * pp[i][j + 2]) / cx1[i][j];
                 r0y += resia[i][j] * y[i][j];
             }
         }
@@ -327,10 +324,10 @@ void kawamuraByBiCGSTAB(int mode) {
             #pragma omp for private(j) reduction(+:zs) reduction(+:zz) collapse(2)
             for (i = 2; i < l + 1; i++) {
                 for (j = 2; j < m + 1; j++) {
-                    z[i][j] = cx1[i][j] * s[i][j] + cx2[i][j] * s[i - 1][j] + cx3[i][j] * s[i + 1][j]
+                    z[i][j] = s[i][j] + (cx2[i][j] * s[i - 1][j] + cx3[i][j] * s[i + 1][j]
                         + cx4[i][j] * s[i][j - 1] + cx5[i][j] * s[i][j + 1]
                         + cx6[i][j] * s[i - 2][j] + cx7[i][j] * s[i + 2][j]
-                        + cx8[i][j] * s[i][j - 2] + cx9[i][j] * s[i][j + 2];
+                        + cx8[i][j] * s[i][j - 2] + cx9[i][j] * s[i][j + 2]) / cx1[i][j];
                     zs += z[i][j] * s[i][j];
                     zz += z[i][j] * z[i][j];
                 }
@@ -438,7 +435,7 @@ void pressureByCG() {
         for (i = 2; i < l + 1; i++) {
             for (j = 2; j < m + 1; j++) {
                 h = ((u3[i + 1][j] - u3[i - 1][j]) / dx + (v3[i][j + 1] - v3[i][j - 1]) / dy) / (2 * dt); //ˆ³—Í‚Ìƒ|ƒAƒ\ƒ“•û’ö®‚Ì‰E•Ó
-                resi[i][j] = h - (cp3 * p[i + 1][j] + cp2 * p[i - 1][j] + cp5 * p[i][j + 1] + cp4 * p[i][j - 1] + cp1 * p[i][j]);
+                resi[i][j] = h / cp1 - ((cp3 * p[i + 1][j] + cp2 * p[i - 1][j] + cp5 * p[i][j + 1] + cp4 * p[i][j - 1]) / cp1 + p[i][j]);
                 pp[i][j] = resi[i][j];
                 rr += resi[i][j] * resi[i][j];
             }
@@ -473,7 +470,7 @@ void pressureByCG() {
         #pragma omp parallel for private(j) reduction(+:ppy) collapse(2)
         for ( i = 2; i < l + 1; i++) {
             for ( j = 2; j < m + 1; j++) {
-                y[i][j] = cp1 * pp[i][j] + cp2 * pp[i - 1][j] + cp3 * pp[i + 1][j] + cp4 * pp[i][j - 1] + cp5 * pp[i][j + 1];
+                y[i][j] = pp[i][j] + (cp2 * pp[i - 1][j] + cp3 * pp[i + 1][j] + cp4 * pp[i][j - 1] + cp5 * pp[i][j + 1]) / cp1;
                 ppy += pp[i][j] * y[i][j];
             }
         }
